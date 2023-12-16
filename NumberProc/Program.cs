@@ -12,6 +12,7 @@ numberProc.Print();
 public class NumberProc
 {
     private IEnumerable<int> _numbers;
+    private readonly List<Func<int, int>> _operations = new();
 
     public NumberProc(IEnumerable<int> initialNumbers)
     {
@@ -20,24 +21,26 @@ public class NumberProc
 
     public NumberProc Add(int value)
     {
-        _numbers = _numbers.Select(num => num + value);
+        _operations.Add(x => x + value);
         return this;
     }
 
     public NumberProc Sub(int value)
     {
-        _numbers = _numbers.Select(num => num - value);
+        _operations.Add(x => x - value);
         return this;
     }
 
     public NumberProc Div(int value)
     {
-        _numbers = _numbers.Select(num => num / value);
+        _operations.Add(x => x / value);
         return this;
     }
 
     public void Print()
     {
+        _numbers = _numbers.Select(x => _operations.Aggregate(x, (current, operation) => operation(current))).ToList();
+        _operations.Clear();
         Console.WriteLine(string.Join(", ", _numbers));
     }
 }
